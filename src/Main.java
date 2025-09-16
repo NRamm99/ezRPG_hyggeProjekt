@@ -6,6 +6,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
 
+
         // Welcome screen
         welcomeScreen(input);
 
@@ -22,8 +23,13 @@ public class Main {
         waitForInput(input);
 
         // main menu
-        mainMenuController(input, hero);
+        mainMenuController(input, hero, enemy1, enemy2);
 
+        // Game over
+        clearConsole();
+        hero.printStats();
+        System.out.println();
+        System.out.println("GAME OVER");
     }
 
     public static void clearConsole() {
@@ -37,7 +43,7 @@ public class Main {
         input.nextLine();
     }
 
-    public static void fightController(Character hero, Character enemy, Scanner input) {
+    public static void fightController(Character hero, Character enemy, Scanner input, int xpGained) {
         while (hero.health > 0 && enemy.health > 0) {
             clearConsole();
             enemy.takeDamage(hero.attack - enemy.defence);
@@ -60,16 +66,23 @@ public class Main {
                 sleepCatcher(3);
             }
         }
+        // Fight outcome
         System.out.println();
-        if (hero.health > 0) {
+        if (hero.health > 0) { // Hero wins
+            clearConsole();
             System.out.println(hero.name + " defeats " + enemy.name + " in battle.");
             System.out.println("Well done " + hero.name + "!");
+
+            hero.addXp(xpGained);
+            System.out.println("You've gained " + xpGained + " xp!");
             waitForInput(input);
-        } else if (enemy.health > 0) {
+        } else if (enemy.health > 0) { // Hero dies
+            clearConsole();
             System.out.println(enemy.name + " defeats " + hero.name + " in battle.");
             System.out.println("Oh no!");
             waitForInput(input);
-        } else {
+        } else { // Error
+            clearConsole();
             System.out.println("ERROR - NO WINNER FOUND");
             waitForInput(input);
         }
@@ -89,12 +102,12 @@ public class Main {
 
     public static Character[] characterInitializer(String name) {
         // Hero instance creation
-        Character hero = new Character(name, 100, 15, 10);
+        Character hero = new Character(name, 100, 15, 10, 0);
         clearConsole();
 
         // Enemy creation
-        Character enemy1 = new Character("Orc", 50, 15, 5);
-        Character enemy2 = new Character("Rat", 20, 10, 0);
+        Character enemy1 = new Character("Orc", 50, 15, 5, 10);
+        Character enemy2 = new Character("Rat", 20, 10, 0, 2);
         return new Character[]{hero, enemy1, enemy2};
     }
 
@@ -109,33 +122,40 @@ public class Main {
         System.out.println();
     }
 
-    public static int mainMenu(Scanner input) {
-        clearConsole();
-        titleArt();
-        System.out.println("""
-                >>===================<<
-                ||     Main menu     ||
-                >>===================<<""");
-        System.out.println("""
-                1... Look for enemies
-                2... My stats
-                3... Quit
-                """);
-        String userInput = input.nextLine();
-        return switch (userInput.toLowerCase()) {
-            case "look for enemies" -> 1;
-            case "my stats" -> 2;
-            case "quit" -> 3;
-            default -> 0;
-        };
+    public static int mainMenu(Scanner input, Character hero) {
+        if(hero.xp >= hero.nextXp){
+            hero.levelUp(hero);
+        }
+        if (hero.health > 0) {
+            clearConsole();
+            titleArt();
+            System.out.println("""
+                    >>===================<<
+                    ||     Main menu     ||
+                    >>===================<<""");
+            System.out.println("""
+                    1... Look for enemies
+                    2... My stats
+                    3... Quit
+                    """);
+            String userInput = input.nextLine();
+            return switch (userInput.toLowerCase()) {
+                case "look for enemies" -> 1;
+                case "my stats" -> 2;
+                case "quit" -> 3;
+                default -> 0;
+            };
+        }
+        return -10;
     }
 
-    public static void mainMenuController(Scanner input, Character hero) {
+    public static void mainMenuController(Scanner input, Character hero, Character enemy1, Character enemy2) {
         boolean quit = false;
         do {
-            switch (mainMenu(input)) {
+            hero.enemyReset(enemy1, enemy2);
+            switch (mainMenu(input, hero)) {
                 case 1: // Looking for enemies
-                    enemyEncounter();
+                    enemyEncounter(hero, enemy1, enemy2, input);
                     break;
                 case 2: // My stats
                     clearConsole();
@@ -145,6 +165,8 @@ public class Main {
                 case 3: // Quit
                     quit = true;
                     break;
+                case -10: // Game over
+                    break;
                 default: // Invalid input
                     System.out.println("your input was invalid.");
                     break;
@@ -152,11 +174,42 @@ public class Main {
         } while (!quit);
     }
 
-    public static void enemyEncounter() {
-        clearConsole();
-        titleArt();
+    public static void enemyEncounter(Character hero, Character enemy1, Character enemy2, Scanner input) {
 
-        System.out.println("you encounter a");
+        Character enemy = enemyPicker(enemy1, enemy2);
+        boolean activeEncounter = true;
+        do {
+            clearConsole();
+            titleArt();
+            System.out.println("you encounter a " + enemy.name + "!");
+            System.out.println("""
+                    1... Fight
+                    2... Check enemy stats
+                    3... Flee
+                    """);
+            String userInput = input.nextLine();
+            switch (userInput.toLowerCase()) {
+                case "fight":
+                    fightController(hero, enemy, input, enemy.xp);
+                    activeEncounter = false;
+                    break;
+                case "check enemy stats":
+                    clearConsole();
+                    titleArt();
+                    enemy.printStats();
+                    waitForInput(input);
+                    break;
+                case "flee":
+                    activeEncounter = false;
+                    break;
+                default:
+                    System.out.println("ERROR - INVALID INPUT");
+                    break;
+            }
+
+        } while (activeEncounter);
+
+
     }
 
     public static Character enemyPicker(Character enemy1, Character enemy2) {
