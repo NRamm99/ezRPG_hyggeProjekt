@@ -54,10 +54,6 @@ public class Character {
         defence += amount;
     }
 
-    public void removeXp(int amount) {
-        xp = amount;
-    }
-
     public void levelUp(Character hero) {
         level++;
         nextXp = nextXp + 20;
