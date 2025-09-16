@@ -92,7 +92,6 @@ public class Character {
                 break;
         }
     }
-
     public void enemyReset(Character enemy1, Character enemy2){
         enemy1.health = 50; // Orc
         enemy2.health = 20; // Rat

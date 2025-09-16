@@ -99,7 +99,6 @@ public class Main {
             }
         }
     }
-
     public static Character[] characterInitializer(String name) {
         // Hero instance creation
         Character hero = new Character(name, 100, 15, 10, 0);
