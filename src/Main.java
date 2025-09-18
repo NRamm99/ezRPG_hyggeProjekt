@@ -12,10 +12,11 @@ public class Main {
 
         // Character initialization and name chooser
         String name = nameChooser(input);
-        Character[] character = characterInitializer(name);
-        Character hero = character[0];
-        Character enemy1 = character[1];
-        Character enemy2 = character[2];
+        Character[] characters = characterInitializer(name);
+
+        Hero hero = (Hero) characters[0];
+        Enemy enemy1 = (Enemy) characters[1];
+        Enemy enemy2 = (Enemy) characters[2];
 
         // Character stats
         titleArt();
@@ -43,13 +44,13 @@ public class Main {
         input.nextLine();
     }
 
-    public static void fightController(Character hero, Character enemy, Scanner input, int xpGained) {
+    public static void fightController(Hero hero, Enemy enemy, Scanner input, int xpYield) {
         while (hero.health > 0 && enemy.health > 0) {
             clearConsole();
-            enemy.takeDamage(hero.attack - enemy.defence);
-            System.out.println("You swing your axe the " + enemy.name + " and deal " + (hero.attack - enemy.defence) + " dmg! \n");
+            enemy.takeDamage(hero.damageCalculator(hero.attack, enemy.defence));
+            System.out.println("You swing your axe the " + enemy.name + " and deal " + (hero.damageCalculator(hero.attack, enemy.defence)) + " dmg! \n");
             System.out.println(hero.name + " HP: " + hero.health);
-            System.out.println(enemy.name + " HP: " + enemy.health + "(-" + (hero.attack - enemy.defence) + ")");
+            System.out.println(enemy.name + " HP: " + enemy.health + "(-" + (hero.damageCalculator(hero.attack, enemy.defence)) + ")");
 
             // pause mellem attacks
             sleepCatcher(3);
@@ -57,9 +58,9 @@ public class Main {
             if (hero.health > 0 && enemy.health > 0) {
 
                 clearConsole();
-                hero.takeDamage(enemy.attack - hero.defence);
-                System.out.println("The " + enemy.name + " swings it's hammer against you and deals " + (enemy.attack - hero.defence) + " dmg! \n");
-                System.out.println(hero.name + " HP: " + hero.health + "(-" + (enemy.attack - hero.defence) + ")");
+                hero.takeDamage(hero.damageCalculator(enemy.attack, hero.defence));
+                System.out.println("The " + enemy.name + " swings it's hammer against you and deals " + (hero.damageCalculator(enemy.attack, hero.defence)) + " dmg! \n");
+                System.out.println(hero.name + " HP: " + hero.health + "(-" + (hero.damageCalculator(enemy.attack, hero.defence)) + ")");
                 System.out.println(enemy.name + " HP: " + enemy.health);
 
                 // pause mellem attacks
@@ -73,8 +74,8 @@ public class Main {
             System.out.println(hero.name + " defeats " + enemy.name + " in battle.");
             System.out.println("Well done " + hero.name + "!");
 
-            hero.addXp(xpGained);
-            System.out.println("You've gained " + xpGained + " xp!");
+            hero.addXp(xpYield);
+            System.out.println("You've gained " + xpYield + " xp!");
             waitForInput(input);
         } else if (enemy.health > 0) { // Hero dies
             clearConsole();
@@ -95,19 +96,17 @@ public class Main {
             try {
                 Thread.sleep(1000); // vent 1 sec
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                System.out.println("Sleep was interrupted!");
+                Thread.currentThread().interrupt(); // good practice
             }
         }
     }
     public static Character[] characterInitializer(String name) {
-        // Hero instance creation
-        Character hero = new Character(name, 100, 15, 10, 0);
-        clearConsole();
+        Hero hero = new Hero(name, 100, 10, 5, 0);
+        Enemy enemy1 = new Enemy("Orc", 50, 6, 3, 5);
+        Enemy enemy2 = new Enemy("Rat", 20, 2, 1, 2);
 
-        // Enemy creation
-        Character enemy1 = new Character("Orc", 50, 15, 5, 10);
-        Character enemy2 = new Character("Rat", 20, 10, 0, 2);
-        return new Character[]{hero, enemy1, enemy2};
+        return new Character[]{ hero, enemy1, enemy2 };
     }
 
     public static void titleArt() {
@@ -121,7 +120,7 @@ public class Main {
         System.out.println();
     }
 
-    public static int mainMenu(Scanner input, Character hero) {
+    public static int mainMenu(Scanner input, Hero hero) {
         if(hero.xp >= hero.nextXp){
             hero.levelUp(hero);
         }
@@ -148,10 +147,10 @@ public class Main {
         return -10;
     }
 
-    public static void mainMenuController(Scanner input, Character hero, Character enemy1, Character enemy2) {
+    public static void mainMenuController(Scanner input, Hero hero, Enemy enemy1, Enemy enemy2) {
         boolean quit = false;
         do {
-            hero.enemyReset(enemy1, enemy2);
+            enemy1.enemyReset(enemy1, enemy2);
             switch (mainMenu(input, hero)) {
                 case 1: // Looking for enemies
                     enemyEncounter(hero, enemy1, enemy2, input);
@@ -173,9 +172,9 @@ public class Main {
         } while (!quit);
     }
 
-    public static void enemyEncounter(Character hero, Character enemy1, Character enemy2, Scanner input) {
+    public static void enemyEncounter(Hero hero, Enemy enemy1, Enemy enemy2, Scanner input) {
 
-        Character enemy = enemyPicker(enemy1, enemy2);
+        Enemy enemy = enemyPicker(enemy1, enemy2);
         boolean activeEncounter = true;
         do {
             clearConsole();
@@ -189,7 +188,7 @@ public class Main {
             String userInput = input.nextLine();
             switch (userInput.toLowerCase()) {
                 case "fight":
-                    fightController(hero, enemy, input, enemy.xp);
+                    fightController(hero, enemy, input, enemy.xpYield);
                     activeEncounter = false;
                     break;
                 case "check enemy stats":
@@ -211,7 +210,7 @@ public class Main {
 
     }
 
-    public static Character enemyPicker(Character enemy1, Character enemy2) {
+    public static Enemy enemyPicker(Enemy enemy1, Enemy enemy2) {
         Random rand = new Random();
         int choice = rand.nextInt(2); // 0 or 1
         if (choice == 0) {

@@ -54,15 +54,17 @@ public class Character {
         defence += amount;
     }
 
-    public void levelUp(Character hero) {
+    public void levelUp(Hero hero) {
         level++;
         nextXp = nextXp + 20;
         statChooser(hero);
-
-
     }
 
-    public void statChooser(Character hero) {
+    public int damageCalculator(int attackerAtk, int defenderDef){
+        return Math.max((attackerAtk - defenderDef), 0);
+    }
+
+    public void statChooser(Hero hero) {
         Scanner input = new Scanner(System.in);
         Main.clearConsole();
         System.out.println("LEVEL UP!");
@@ -92,9 +94,11 @@ public class Character {
                 break;
         }
     }
-    public void enemyReset(Character enemy1, Character enemy2){
+
+    public void enemyReset(Enemy enemy1, Enemy enemy2) {
         enemy1.health = 50; // Orc
         enemy2.health = 20; // Rat
     }
+
 
 }
