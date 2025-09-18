@@ -5,7 +5,8 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-
+        int mapLevel = 1;
+        GameMap map = new GameMap(mapLevel);
 
         // Welcome screen
         welcomeScreen(input);
@@ -24,7 +25,7 @@ public class Main {
         waitForInput(input);
 
         // main menu
-        mainMenuController(input, hero, enemy1, enemy2);
+        mainMenuController(input, hero, enemy1, enemy2, map, mapLevel);
 
         // Game over
         clearConsole();
@@ -101,12 +102,13 @@ public class Main {
             }
         }
     }
+
     public static Character[] characterInitializer(String name) {
         Hero hero = new Hero(name, 100, 10, 5, 0);
         Enemy enemy1 = new Enemy("Orc", 50, 6, 3, 5);
         Enemy enemy2 = new Enemy("Rat", 20, 2, 1, 2);
 
-        return new Character[]{ hero, enemy1, enemy2 };
+        return new Character[]{hero, enemy1, enemy2};
     }
 
     public static void titleArt() {
@@ -120,13 +122,14 @@ public class Main {
         System.out.println();
     }
 
-    public static int mainMenu(Scanner input, Hero hero) {
-        if(hero.xp >= hero.nextXp){
+    public static int mainMenu(Scanner input, Hero hero, GameMap map, int mapLevel) {
+        if (hero.xp >= hero.nextXp) {
             hero.levelUp(hero);
         }
         if (hero.health > 0) {
             clearConsole();
             titleArt();
+            map.drawMap(mapLevel);
             System.out.println("""
                     >>===================<<
                     ||     Main menu     ||
@@ -147,11 +150,11 @@ public class Main {
         return -10;
     }
 
-    public static void mainMenuController(Scanner input, Hero hero, Enemy enemy1, Enemy enemy2) {
+    public static void mainMenuController(Scanner input, Hero hero, Enemy enemy1, Enemy enemy2, GameMap map, int mapLevel) {
         boolean quit = false;
         do {
             enemy1.enemyReset(enemy1, enemy2);
-            switch (mainMenu(input, hero)) {
+            switch (mainMenu(input, hero, map, mapLevel)) {
                 case 1: // Looking for enemies
                     enemyEncounter(hero, enemy1, enemy2, input);
                     break;
@@ -241,4 +244,5 @@ public class Main {
         System.out.print("My hero should be called ");
         return input.nextLine();
     }
+
 }
