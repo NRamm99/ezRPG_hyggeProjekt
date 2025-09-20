@@ -125,6 +125,7 @@ public class Main {
     public static int mainMenu(Scanner input, Hero hero, GameMap map, int mapLevel) {
         if (hero.xp >= hero.nextXp) {
             hero.levelUp(hero);
+            map.moveRight();
         }
         if (hero.health > 0) {
             clearConsole();
