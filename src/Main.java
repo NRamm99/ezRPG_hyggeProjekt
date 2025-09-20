@@ -125,7 +125,9 @@ public class Main {
     public static int mainMenu(Scanner input, Hero hero, GameMap map, int mapLevel) {
         if (hero.xp >= hero.nextXp) {
             hero.levelUp(hero);
-            map.moveRight();
+            MapResult result = mapHandler(hero, map, mapLevel);
+            map = result.map;
+            mapLevel = result.mapLevel;
         }
         if (hero.health > 0) {
             clearConsole();
@@ -145,6 +147,10 @@ public class Main {
                 case "look for enemies" -> 1;
                 case "my stats" -> 2;
                 case "quit" -> 3;
+                case "lvlup" -> 10;
+                case "xp" -> 11;
+                case "r" -> 12;
+                case "d" -> 13;
                 default -> 0;
             };
         }
@@ -168,6 +174,19 @@ public class Main {
                     quit = true;
                     break;
                 case -10: // Game over
+                    break;
+                // Testing kit
+                case 10:
+                    hero.levelUp(hero);
+                    break;
+                case 11:
+                    hero.addXp(10);
+                    break;
+                case 12:
+                    map.moveRight();
+                    break;
+                case 13:
+                    map.moveDown();
                     break;
                 default: // Invalid input
                     System.out.println("your input was invalid.");
@@ -245,5 +264,24 @@ public class Main {
         System.out.print("My hero should be called ");
         return input.nextLine();
     }
+
+    public static MapResult mapHandler(Hero hero, GameMap map, int mapLevel) {
+        if (!map.moveRight()) { // can't move further -> next level
+            mapLevel++;
+            map = new GameMap(mapLevel);
+        }
+        return new MapResult(map, mapLevel);
+    }
+
+    public static class MapResult {
+        public GameMap map;
+        public int mapLevel;
+
+        public MapResult(GameMap map, int mapLevel) {
+            this.map = map;
+            this.mapLevel = mapLevel;
+        }
+    }
+
 
 }
