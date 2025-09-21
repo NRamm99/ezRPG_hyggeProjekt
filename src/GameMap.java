@@ -33,14 +33,6 @@ public class GameMap {
         }
     }
 
-//    public void moveRight() {
-//        if (playerX < currentMap[playerY].length - 1) {
-//            currentMap[playerY][playerX] = '-';
-//            playerX++;
-//            currentMap[playerY][playerX] = 'P';
-//        }
-//    }
-
     public boolean moveRight() {
         if (playerX < currentMap[playerY].length - 1) {
             currentMap[playerY][playerX] = '-';
